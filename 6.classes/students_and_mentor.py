@@ -7,20 +7,40 @@ class Student:
         self.courses_in_progress = []
         self.grades = {}
 
-    def average(self):
-        calc = sum([i[1] for i in self.grades]) / len(
-            self.grades
-        )  # проверить возможно ошибка
-        return round(calc, 1)
+    def rate_ht(self, lecturer, course, grade):
+        if isinstance(lecturer, Lecturer) and course in lecturer.courses_in_progress:
+            if course in lecturer.grades:
+                lecturer.grades[course] += [grade]
+            else:
+                lecturer.grades[course] = [grade]
+        else:
+            return "Ошибка"
+
+    def calc_average(self):
+        val_lst = sum(self.grades.values(), [])
+        return round(sum(val_lst) / len(val_lst), 1)
 
     def __str__(self):
-        return f"Имя:{self.name}\nФамилия:{self.surname}\n\
-        Средняя оценка за домашние задания:{self.average()}\n\
-        Курсы в процессе изучения:{' '.join(self.courses_in_progress)}\n\
-        Завершенные курсы:{' '.join(self.finished_courses)}\n "
+        return f"Имя: {self.name}\nФамилия: {self.surname}\n\
+        Средняя оценка за домашние задания: {self.calc_average()}\n\
+        Курсы в процессе изучения: {', '.join(self.courses_in_progress)}\n\
+        Завершенные курсы: {', '.join(self.finished_courses)}\n"
+
+    def __lt__(self, other):
+        if not isinstance(other, Student):
+            print("Not a Student")
+            return
+        return self.calc_average() < other.calc_average()
 
 
 class Mentor:
+    def __init__(self, name, surname):
+        self.name = name
+        self.surname = surname
+        self.courses_attached = []
+
+
+class Reviewer(Mentor):
     def __init__(self, name, surname):
         self.name = name
         self.surname = surname
@@ -39,26 +59,69 @@ class Mentor:
         else:
             return "Ошибка"
 
-
-class Lecturer(Mentor):
-    pass
-
-
-class Reviewer(Mentor):
-    pass
-
     def __str__(self):
         return f"Имя: {self.name}\nФамилия: {self.surname}\n"
 
 
-best_student = Student("Ruoy", "Eman", "your_gender")
-best_student.courses_in_progress += ["Python"]
+class Lecturer(Mentor):
+    def __init__(self, name, surname):
+        self.name = name
+        self.surname = surname
+        self.courses_attached = []
+        self.courses_in_progress = []
+        self.grades = {}
 
-cool_mentor = Mentor("Some", "Buddy")
+    def calc_average(self):
+        val_lst = sum(self.grades.values(), [])
+        return round(sum(val_lst) / len(val_lst), 1)
+
+    def __str__(self):
+        return f"Имя:{self.name}\nФамилия:{self.surname}\n\
+        Средняя оценка за лекции: {self.calc_average()}\n"
+
+    def __lt__(self, other):
+        if not isinstance(other, Lecturer):
+            print("Not a Lecturer\n")
+            return
+        return self.calc_average() < other.calc_average()
+
+
+some_student = Student("Ruoy", "Eman", "m")
+some_student.courses_in_progress += ["Python", "Git"]
+some_student.finished_courses += ["Введение в программирование", "Веб-разработка с нуля"]
+
+du_student = Student("Eva", "Green", "w")
+du_student.courses_in_progress += ["Python"]
+du_student.finished_courses += ["Введение в программирование", "Веб-разработка с нуля"]
+
+cool_mentor = Reviewer("Some", "Buddy")
+some_reviewer = Reviewer("Some", "Buddy")
 cool_mentor.courses_attached += ["Python"]
 
-cool_mentor.rate_hw(best_student, "Python", 10)
-cool_mentor.rate_hw(best_student, "Python", 10)
-cool_mentor.rate_hw(best_student, "Python", 10)
+cool_mentor.rate_hw(du_student, "Python", 9)
+cool_mentor.rate_hw(du_student, "Python", 8)
+cool_mentor.rate_hw(du_student, "Python", 10)
 
-print(best_student.grades)
+cool_mentor.rate_hw(some_student, "Python", 10)
+cool_mentor.rate_hw(some_student, "Python", 9)
+cool_mentor.rate_hw(some_student, "Python", 7)
+
+some_lecturer = Lecturer("Some", "Buddy")
+some_lecturer.courses_in_progress += ["Python"]
+some_lecturer.courses_attached += ["Python"]
+
+some_student.rate_ht(some_lecturer, "Python", 7)
+some_student.rate_ht(some_lecturer, "Python", 9)
+some_student.rate_ht(some_lecturer, "Python", 10)
+
+ser_lecturer = Lecturer("Jastin", "Black")
+ser_lecturer.courses_in_progress += ["Python"]
+ser_lecturer.courses_attached += ["Python"]
+
+some_student.rate_ht(ser_lecturer, "Python", 9)
+some_student.rate_ht(ser_lecturer, "Python", 6)
+some_student.rate_ht(ser_lecturer, "Python", 10)
+
+print(some_reviewer)
+print(some_lecturer)
+print(some_student)
